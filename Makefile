@@ -1,7 +1,7 @@
 all: hxdmp
 
 hxdmp: main.c Makefile
-	${CC} main.c -o hxdmp -O3 -Wall -Wextra -Werror
+	${CC} main.c -o hxdmp -O3 -std=c99 -Wall -Wextra -Werror
 
 clean:
 	rm -f hxdmp
