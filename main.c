@@ -232,6 +232,8 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
+	fseek(fh, start, SEEK_SET);
+
 	uint8_t* rowBuffer = (uint8_t*)malloc(width);
 	size_t totalBytesRead = 0;
 	bool shouldBreak;
