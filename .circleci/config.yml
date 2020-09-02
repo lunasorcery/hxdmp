@@ -1,0 +1,17 @@
+version: 2
+
+jobs:
+  build:
+    docker:
+      - image: gcc:8.2
+    steps:
+      - checkout
+      - run:
+          name: Compile
+          command: make
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - build

@@ -1,10 +1,13 @@
-all: hxdmp
+all: bin/hxdmp
 
-hxdmp: main.c Makefile
-	${CC} main.c -o hxdmp -O3 -std=c99 -Wall -Wextra -Werror
+bin/hxdmp: main.c Makefile
+	mkdir -p bin
+	${CC} main.c -o bin/hxdmp -O3 -std=c99 -Wall -Wextra
 
 clean:
-	rm -f hxdmp
+	rm -rf bin
 
-install: hxdmp
-	cp hxdmp /usr/local/bin/hxdmp
+install: bin/hxdmp
+	cp bin/hxdmp /usr/local/bin/hxdmp
+
+.PHONY: all clean install
