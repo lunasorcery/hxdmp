@@ -226,88 +226,99 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-	FILE* fh = fopen(argv[optind], "rb");
-	if (!fh) {
-		eprintf("Failed to open '%s' for reading.\n", argv[optind]);
-		return 1;
-	}
+	int const numFiles = argc-optind;
 
-	fseek(fh, start, SEEK_SET);
+	for (int arg = optind; arg < argc; ++arg) {
+		FILE* fh = fopen(argv[arg], "rb");
+		if (!fh) {
+			eprintf("Failed to open '%s' for reading.\n", argv[arg]);
+			return 1;
+		}
 
-	uint8_t* rowBuffer = (uint8_t*)malloc(width);
-	size_t totalBytesRead = 0;
-	bool shouldBreak;
-	do {
-		size_t const rowAddress = ftell(fh);
-		shouldBreak = false;
-		int bytesRead = fread(rowBuffer, 1, width, fh);
-		totalBytesRead += bytesRead;
-		if (length >= 0 && totalBytesRead > (size_t)length) {
-			bytesRead -= (totalBytesRead-length);
-			shouldBreak = true;
-		}
-		if (bytesRead == 0) {
-			break;
-		}
-		printf("%08lx |", rowAddress);
-		for (unsigned int l = 0; l < strlen(layout); ++l) {
-			switch (layout[l]) {
-				case 'x':
-					printf(" ");
-					for (int i = 0; i < width; ++i) {
-						if (i < bytesRead) {
-							printf("%02x ", rowBuffer[i]);
-						} else {
-							printf("   ");
-						}
-					}
-					printf("|");
-					break;
-				case 'X':
-					printf(" ");
-					for (int i = 0; i < width; ++i) {
-						if (i < bytesRead) {
-							printf("%02X ", rowBuffer[i]);
-						} else {
-							printf("   ");
-						}
-					}
-					printf("|");
-					break;
-				case 'a':
-					printf(" ");
-					for (int i = 0; i < width; ++i) {
-						if (i < bytesRead) {
-							printf("%c", rowBuffer[i] >= ' ' && rowBuffer[i] < 0x7f ? rowBuffer[i] : '.');
-						} else {
-							printf(" ");
-						}
-					}
-					printf(" |");
-					break;
-				case 'c':
-					printf(" ");
-					for (int i = 0; i < width; ++i) {
-						if (i < bytesRead) {
-							if (i == 0 || rowBuffer[i] != rowBuffer[i-1]) {
-								if (colorMode == TrueColor) {
-									printf("\x1b[38;2;%d;%d;%dm", rowBuffer[i], rowBuffer[i], rowBuffer[i]);
-								} else if (colorMode == VgaColor) {
-									printf("\x1b[38;5;%dm", 232+rowBuffer[i]/11);
-								}
-							}
-							printf("█");
-						} else {
-							printf(" ");
-						}
-					}
-					printf("\x1b[0m");
-					printf(" |");
-					break;
+		if (numFiles > 1) {
+			if (arg != optind) {
+				printf("\n");
 			}
+			printf("%s\n", argv[arg]);
 		}
-		printf("\n");
-	} while (!shouldBreak);
-	free(rowBuffer);
-	fclose(fh);
+
+		fseek(fh, start, SEEK_SET);
+
+		uint8_t* rowBuffer = (uint8_t*)malloc(width);
+		size_t totalBytesRead = 0;
+		bool shouldBreak;
+		do {
+			size_t const rowAddress = ftell(fh);
+			shouldBreak = false;
+			int bytesRead = fread(rowBuffer, 1, width, fh);
+			totalBytesRead += bytesRead;
+			if (length >= 0 && totalBytesRead > (size_t)length) {
+				bytesRead -= (totalBytesRead-length);
+				shouldBreak = true;
+			}
+			if (bytesRead == 0) {
+				break;
+			}
+			printf("%08lx |", rowAddress);
+			for (unsigned int l = 0; l < strlen(layout); ++l) {
+				switch (layout[l]) {
+					case 'x':
+						printf(" ");
+						for (int i = 0; i < width; ++i) {
+							if (i < bytesRead) {
+								printf("%02x ", rowBuffer[i]);
+							} else {
+								printf("   ");
+							}
+						}
+						printf("|");
+						break;
+					case 'X':
+						printf(" ");
+						for (int i = 0; i < width; ++i) {
+							if (i < bytesRead) {
+								printf("%02X ", rowBuffer[i]);
+							} else {
+								printf("   ");
+							}
+						}
+						printf("|");
+						break;
+					case 'a':
+						printf(" ");
+						for (int i = 0; i < width; ++i) {
+							if (i < bytesRead) {
+								printf("%c", rowBuffer[i] >= ' ' && rowBuffer[i] < 0x7f ? rowBuffer[i] : '.');
+							} else {
+								printf(" ");
+							}
+						}
+						printf(" |");
+						break;
+					case 'c':
+						printf(" ");
+						for (int i = 0; i < width; ++i) {
+							if (i < bytesRead) {
+								if (i == 0 || rowBuffer[i] != rowBuffer[i-1]) {
+									if (colorMode == TrueColor) {
+										printf("\x1b[38;2;%d;%d;%dm", rowBuffer[i], rowBuffer[i], rowBuffer[i]);
+									} else if (colorMode == VgaColor) {
+										printf("\x1b[38;5;%dm", 232+rowBuffer[i]/11);
+									}
+								}
+								printf("█");
+							} else {
+								printf(" ");
+							}
+						}
+						printf("\x1b[0m");
+						printf(" |");
+						break;
+				}
+			}
+			printf("\n");
+		} while (!shouldBreak);
+		free(rowBuffer);
+		fclose(fh);
+	}
 }
