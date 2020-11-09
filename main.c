@@ -40,10 +40,10 @@ void printHelp() {
 	puts("        Customize the column layout using a layout string.");
 	puts("        Each character of " kAnsiUnderline "layout_str" kAnsiReset " represents a column.");
 	puts("        Available column types are:");
-	puts("        a: Ascii   Each byte is printed in ascii, or '.' for non-ascii values");
-	puts("        c: Color   Each byte is printed as a █, colored according to its value");
-	puts("        x: heX     Each byte is printed as two lowercase hex digits");
-	puts("        X: heX     Each byte is printed as two uppercase hex digits");
+	puts("        a (ascii) Each byte is printed in ascii, or '.' for non-ascii values");
+	puts("        c (color) Each byte is printed as a block colored according to its value");
+	puts("        x (hex)   Each byte is printed as two lowercase hex digits");
+	puts("        X (hex)   Each byte is printed as two uppercase hex digits");
 	puts("        The default layout string is xa for consistency with most hex editors.");
 	puts("        You can replace the default with the HXDMP_LAYOUT environment variable.");
 	puts("");
@@ -301,15 +301,15 @@ int main(int argc, char** argv)
 							if (i < bytesRead) {
 								if (i == 0 || rowBuffer[i] != rowBuffer[i-1]) {
 									if (colorMode == TrueColor) {
-										printf("\x1b[38;2;%d;%d;%dm", rowBuffer[i], rowBuffer[i], rowBuffer[i]);
+										printf("\x1b[48;2;%d;%d;%dm", rowBuffer[i], rowBuffer[i], rowBuffer[i]);
 									} else if (colorMode == VgaColor) {
-										printf("\x1b[38;5;%dm", 232+rowBuffer[i]/11);
+										printf("\x1b[48;5;%dm", 232+rowBuffer[i]/11);
 									}
 								}
-								printf("█");
-							} else {
-								printf(" ");
+							} else if (i == bytesRead) {
+								printf("\x1b[0m");
 							}
+							printf(" ");
 						}
 						printf("\x1b[0m");
 						printf(" |");
