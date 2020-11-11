@@ -237,7 +237,7 @@ int main(int argc, char** argv)
 
 		if (numFiles > 1) {
 			if (arg != optind) {
-				printf("\n");
+				fputc('\n', stdout);
 			}
 			printf("%s\n", argv[arg]);
 		}
@@ -263,40 +263,40 @@ int main(int argc, char** argv)
 			for (unsigned int l = 0; l < strlen(layout); ++l) {
 				switch (layout[l]) {
 					case 'x':
-						printf(" ");
+						fputs(" ", stdout);
 						for (int i = 0; i < width; ++i) {
 							if (i < bytesRead) {
 								printf("%02x ", rowBuffer[i]);
 							} else {
-								printf("   ");
+								fputs("   ", stdout);
 							}
 						}
-						printf("|");
+						fputs("|", stdout);
 						break;
 					case 'X':
-						printf(" ");
+						fputs(" ", stdout);
 						for (int i = 0; i < width; ++i) {
 							if (i < bytesRead) {
 								printf("%02X ", rowBuffer[i]);
 							} else {
-								printf("   ");
+								fputs("   ", stdout);
 							}
 						}
-						printf("|");
+						fputs("|", stdout);
 						break;
 					case 'a':
-						printf(" ");
+						fputs(" ", stdout);
 						for (int i = 0; i < width; ++i) {
 							if (i < bytesRead) {
-								printf("%c", rowBuffer[i] >= ' ' && rowBuffer[i] < 0x7f ? rowBuffer[i] : '.');
+								fputc((rowBuffer[i] >= ' ' && rowBuffer[i] < 0x7f) ? rowBuffer[i] : '.', stdout);
 							} else {
-								printf(" ");
+								fputc(' ', stdout);
 							}
 						}
-						printf(" |");
+						fputs(" |", stdout);
 						break;
 					case 'c':
-						printf(" ");
+						fputs(" ", stdout);
 						for (int i = 0; i < width; ++i) {
 							if (i < bytesRead) {
 								if (i == 0 || rowBuffer[i] != rowBuffer[i-1]) {
@@ -307,16 +307,16 @@ int main(int argc, char** argv)
 									}
 								}
 							} else if (i == bytesRead) {
-								printf("\x1b[0m");
+								fputs("\x1b[0m", stdout);
 							}
-							printf(" ");
+							fputs(" ", stdout);
 						}
-						printf("\x1b[0m");
-						printf(" |");
+						fputs("\x1b[0m", stdout);
+						fputs(" |", stdout);
 						break;
 				}
 			}
-			printf("\n");
+			fputs("\n", stdout);
 		} while (!shouldBreak);
 		free(rowBuffer);
 		fclose(fh);
