@@ -154,6 +154,7 @@ int main(int argc, char** argv)
 	int64_t length = -1; // -1 is our magic value to say "read to the end"
 	char const* layout = getDefaultLayout();
 	enum eColorMode colorMode = determineColorSupport();
+	bool const enableOptionalColors = isatty(STDOUT_FILENO);
 
 	// parse commandline arguments
 	while (1) {
@@ -286,12 +287,28 @@ int main(int argc, char** argv)
 						break;
 					case 'a':
 						fputs(" ", stdout);
+						bool isColorActive = false;
 						for (int i = 0; i < width; ++i) {
 							if (i < bytesRead) {
-								fputc((rowBuffer[i] >= ' ' && rowBuffer[i] < 0x7f) ? rowBuffer[i] : '.', stdout);
+								if (rowBuffer[i] >= ' ' && rowBuffer[i] < 0x7f) {
+									if (enableOptionalColors && isColorActive) {
+										fputs(kAnsiReset, stdout);
+										isColorActive = false;
+									}
+									fputc(rowBuffer[i], stdout);
+								} else {
+									if (enableOptionalColors && !isColorActive) {
+										fputs("\x1b[94m", stdout);
+										isColorActive = true;
+									}
+									fputc('.', stdout);
+								}
 							} else {
 								fputc(' ', stdout);
 							}
+						}
+						if (isColorActive) {
+							fputs(kAnsiReset, stdout);
 						}
 						fputs(" |", stdout);
 						break;
